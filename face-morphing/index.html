@@ -1,0 +1,302 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+    <style>
+      body {
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: 'Verdana', sans-serif;
+        color: #121212;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Verdana', sans-serif;
+      }
+    </style>
+    <title>CS 194-26: Project 3</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+    </head>
+    
+    <body>
+    
+    <h1 align="left">Project 3:  Face Morphing</h1>
+
+    <br><br>
+
+    <div>
+    
+    <h2 align="left">Part 1. Defining Correspondences</h2>
+       <p>First, I selected a few key points as shown below in the same order on each face. Note, I had to include the corner 
+        points so that the background would be included and the face would not be cut off into a weird shape. Then, I computed the mean between each key point,
+        so that I could create a consistent face mesh and used the Delauny trianglulation algortihm to generate the triangle mesh for each image.
+       </p>
+    <div align="middle">
+        <br><table style="width=100%">
+          <tbody><tr>
+            <td>
+                <figcaption align="middle">My Key Points</figcaption>
+                <img src="./output/key_points.png" align="middle" width="250px">
+            </td>
+            <td>
+                <figcaption align="middle">Image A Face Mesh</figcaption>
+                <img src="./output/edan_mesh.png" align="middle" width="250px">
+            </td>
+            <td>
+                <figcaption align="middle">Image B Face Mesh</figcaption>
+                <img src="./output/tom_mesh.png"  align="middle" width="250px">
+    
+            </td>
+          </tr>
+        </tbody></table>
+      </div>
+    
+    <br>
+    <br>
+    
+    <h2 align="left">Part 2. Computing the "Mid-way Face"</h2>
+    <p><b>Affine Warp and Cross Dissolve Algorithm</b></p>
+    <ol>
+        <li>Get affine tranformation matrix from each triangle in original image to each traingle in mean mesh from Part 1.</li>
+        <li>Warp original image into mean face coordinate space</li>
+            <ul>
+                <li>Generate a coordinate matrix for the image</li>
+                <li>Mutiply the affine tranformation matrix (M) by coordinate matrix to get new coordinate space</li>
+                <li>Remove any coordinates that were mapped to unresonable values</li>
+                <li>Generate a polygon mask that isolates the current triangle on original image</li>
+                <li>Set each new coordinate in resulting image to the corresponding values of original coordinates in masked image.</li>
+                <li>Repeat for each triangle</li>
+            </ul>
+        <li>Fill in any missing points that were not mapped to by interpolation with nearest-neighbor method</li>  
+        <li>Take average of the pixel values at each coorinate in the images (cross-dissolve) </li>
+    </ol>
+        <br>
+        <div align="middle" >
+            <br><table style="width=100%">
+                <tbody><tr>
+                    <td>
+                        <figcaption align="middle">Image A</figcaption>
+                        <img src="./data/edan1.jpg" align="middle" width="300px">
+                    </td>
+                <td>
+                    <figcaption align="middle">Image B</figcaption>
+                    <img src="./data/tom1.jpg" align="middle" width="300px">
+                </td>
+                <td>
+                    <figcaption align="middle">Mean Face</figcaption>
+                    <img src="./output/tom_edan_mean.jpg" align="middle" width="300px">
+                </td>
+                </tr>
+            </tbody></table>
+        </div>
+    <br>
+    <br>
+    <h2 align="left">Part 3. The Morph Sequence</h2>
+        <p><b>Morph Sequence Algorithm</b></p>
+        <p>I essentially just used the affine warp and cross dissolve algorithm from above. However, instead of taking the mean mesh and the mean color of the 
+            two images, I used different weights at each timestep. For this project, I generated 45 evenly spaced weights between 0 and 1, with 0 being 
+            all my face and 1 being all Tom Holland's Face. I then computed the mesh that the images were to be warped into based on a weighted average of each 
+            of the key points. Finally, I did a weighted average of the colors to create a single frame in the morph sequence.
+        </p>
+        <br>
+           Here is the resulting morph:
+        <br>
+        <div align="middle" >
+            <br><table style="width=100%">
+                <tbody><tr>
+                  <td>
+                      <img src="./output/movie.gif" align="middle" width="300px">
+                  </td>
+              </tbody></table>
+          <br>
+        </div>
+    <br>
+
+    <h2 align="left">Part 4. The "Mean face" of a population</h2>
+    <p>For this section, I took the first 100 images of the FEI Database, non-smiling faces.
+        In order to generate the mean face, I took the average of all the key points in the images and genearted the mean face mesh.
+        I then looped through each images and warped them into the mean face mesh. 
+        Finally, I took the weighted sum of each of the pixel values, where each weight was 1/100.
+    </p>
+    <p>Database: <a href="https://fei.edu.br/~cet/facedatabase.html">FEI Face Database</a></p>
+    
+    <br>
+    <div align="middle" >
+        <p align="left">
+          Here is the mean face of the population, along with key points and the face mesh:
+        </p>
+    <br><table style="width=100%">
+            <tbody><tr>
+              <td>
+                <figcaption>Key Points</figcaption>
+                <img src="./output/landmark_46points.jpeg" align="middle" width="200px">
+              </td>
+              <td>
+                <figcaption>Mean Face Mesh</figcaption>
+                <img src="./output/pop_mean_mesh.jpg"  align="middle" width="200px">
+             </td>
+              <td>
+                <figcaption>Population Mean</figcaption>
+                  <img src="./output/mean_face.jpg" align="middle" width="200px">
+              </td>
+            </tr>
+        
+          </tbody></table>
+          <br>
+            <p align="left">
+              Here are some examples of faces warped into the mean face:
+            </p>
+          <br>
+          <table style="width=100%">
+          <br><tbody><tr>
+            <td>
+                <img src="./output/warped-ex-0.jpg" align="middle" width="200px">
+            </td>
+            <td>
+              <img src="./output/warped-ex-1.jpg"  align="middle" width="200px">
+           </td>
+            <td>
+                <img src="./output/warped-ex-2.jpg" align="middle" width="200px">
+            </td>
+            <td>
+              <img src="./output/warped-ex-3.jpg"  align="middle" width="200px">
+           </td>
+          </tr>
+      </tbody></table>
+      <br>
+      <p align="left">
+        Here is my face warped into the mean face shape, and the mean face warped into my face shape.
+      </p>
+    <br>
+    <table style="width=100%">
+            <td>
+                <img src="./output/edan_pop.jpg" align="middle" width="200px">
+            </td>
+            <td>
+                <img src="./data/arrow.png" align="middle" width="50px">
+            </td>
+            <td>
+                <img src="./output/warped_edan.jpg" align="middle" width="200px">
+            </td>
+            <td>
+                <img src="./data/blank.png" align="middle" width="100px">
+            </td>
+            <td>
+                <img src="./output/mean_face.jpg" align="middle" width="200px">
+            </td>
+            <td>
+                <img src="./data/arrow.png" align="middle" width="50px">
+            </td>
+            <td>
+                <img src="./output/warped_mean.jpg" align="middle" width="200px">
+            </td>
+            </tr>
+    </tbody></table>
+    <br>
+        
+
+        <div align="left">
+            <h2 align="left">Part 5. Caricatures: Extrapolating from the mean</h2>
+            <p><b>Caricature Algorithm</b></p>
+            <ol>
+                <li>Compute the different vectors between the orignal face and the mean face</li>
+                <li>Add a multiple of the difference vector back to the orignal face. This will extrapolate its differences.</li>
+                <li>Warp the orignal image into this newly generated "caricature" mesh.</li>
+            </ol>
+
+            <div align="middle" >
+                <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Original Image</figcaption>
+                            <img src="./output/edan_pop.jpg" align="middle" width="200px">
+                        </td>
+                        <td>
+                            <img src="./data/arrow.png" align="middle" width="50px">
+                        </td>
+                        <td>
+                            <figcaption>My Face Caricature</figcaption>
+                            <img src="./output/caricature.jpg" align="middle" width="200px">
+                        </td>
+                        </tr>
+                </tbody></table>       
+            </div>
+
+            <br>
+            <div align="left">
+                <h2 align="left">Bells And Whistles</h2>
+                <p>For my extra credit, I took images of myself from K-12 and created a morhping sequence to show my changes throughtout the years.</p>
+            
+                <div align="middle">
+                <h3 align="left">Original Images</h3>
+                <table style="width=100%">
+                    <table style="width=100%">
+                        <tbody><tr>
+                            <td>
+                                <img src="./data/edan_0.jpg" align="middle" width="150px">
+                            </td>
+                            <td>
+                              <img src="./data/edan_1.jpg"  align="middle" width="150px">
+                           </td>
+                            <td>
+                                <img src="./data/edan_2.jpg"  align="middle" width="150px">
+                           </td>
+                           <td>
+                                <img src="./data/edan_3.jpg" align="middle" width="150px">
+                          </td>
+                           <td>
+                               <img src="./data/edan_4.jpg" align="middle" width="150px">
+                          </td>
+                          <td>
+                            <img src="./data/edan_5.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <img src="./data/edan_6.jpg"  align="middle" width="150px">
+                       </td>
+                          </tr>
+                      </tbody></table>   
+                      <table style="width=100%">
+                        <tbody><tr>
+                           
+                            <td>
+                                <img src="./data/edan_7.jpg"  align="middle" width="150px">
+                           </td>
+                           <td>
+                                <img src="./data/edan_8.jpg" align="middle" width="150px">
+                          </td>
+                           <td>
+                               <img src="./data/edan_9.jpg" align="middle" width="150px">
+                          </td>
+                          <td>
+                            <img src="./data/edan_10.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <img src="./data/edan_11.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <img src="./data/edan_12.jpg"  align="middle" width="150px">
+                       </td>
+                          </tr>
+                      </tbody></table>   
+                      <table style="width=100%">
+                        <tbody><tr>
+                            
+                          </tr>
+                      </tbody></table>  
+                      <br>
+                        <p align="left">
+                            Here is the resulting morph sequence:
+                        </p>
+                    <br>
+                    <br><table style="width=100%">
+                        <tbody><tr>
+                          <td>
+                              <img src="./output/k12_movie.gif" align="middle" width="300px">
+                          </td>
+                      </tbody></table>
+                      
+        </div>
+    </div>
+<br>
+<br>
+</div></body></html>
