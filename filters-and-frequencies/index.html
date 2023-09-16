@@ -1,0 +1,682 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+    <style>
+      body {
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: 'Verdana', sans-serif;
+        color: #121212;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Verdana', sans-serif;
+      }
+    </style>
+    <title>CS 194-26: Project 2</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+    </head>
+    
+    
+    <body>
+    
+    <h1 align="left">Project 2:  Filters and Frequencies</h1>
+
+    <br><br>
+
+    <div>
+    
+
+    <h2 align="left">Part 1.1: Finite Difference Operator</h2>
+    <p><b>Gradient Magnitude Algorithm:</b></p>
+        <ol>
+            <li>Take the gradient with respect to x of the image. This is done by convolving the image with the [-1,1] filter. 
+                <ul>
+                    <li>Note: For the python library, the kernel had to be 2D, so I made the filter be [[-1,1],[0,0]] since the 0s will not affect the magnitude.</li>
+                </ul> 
+            <li>Take the gradient with respect to y of the image. This is done by convolving the image with the [-1,1].T filter.
+                <ul>
+                    <li>Note: Made same adjustment to filter as above just with different shape.</li>
+                </ul> 
+            <li>Binarize the gradient magnitude of both dx and dy images in order to better visualize the edges.
+                <ul>
+                    <li>In this case a good threshold was 60.</li>
+                </ul> 
+            </li>
+            <li>Create the final edge image by adding the two gradient magnitude matrices together.</li>
+        </ol>
+    <br>
+        The resulting images are below:
+    <br>
+    <div align="middle">
+        <br><table style="width=100%">
+          <tbody><tr>
+            <td>
+                <figcaption align="middle">original image</figcaption>
+                <img src="./data/cameraman.png" align="middle" width="200px">
+            </td>
+            <td>
+                <figcaption align="middle">dx gradient</figcaption>
+                <img src="./output/cameraman_dx.jpg" align="middle" width="200px">
+            </td>
+            <td>
+                <figcaption align="middle">dy gradient</figcaption>
+                <img src="./output/cameraman_dy.jpg"  align="middle" width="200px">
+    
+            </td>
+            <td>
+                <figcaption align="middle">edge image</figcaption>
+                <img src="./output/cameraman.jpg" align="middle" width="200px">
+            </td>
+          </tr>
+        </tbody></table>
+      </div>
+    
+    <br>
+    <br>
+    
+    <h2 align="left">Part 1.2: Derivative of Gaussian (DoG) Filter</h2>
+        <p><b>What differences do you see?</b></p>
+        <p>The edges are much more emphasized and the noise is also very low. This make sense because the blur causes the information to spread out and therefore, existing edges
+            are now detected in a wider pixel area. The noise is also greatly reduced because the random pixels that stick out are blurred into the surrouding background. 
+            In this case, the noise level is pretty low in both images because the threshold is much lower for the blurred image. 
+        </p>
+        <br>
+        <div align="middle" >
+            <br><table style="width=100%">
+                <tbody><tr>
+                    <td>
+                        <figcaption align="middle">edge image</figcaption>
+                        <img src="./output/cameraman.jpg" align="middle" width="300px">
+                    </td>
+                <td>
+                    <figcaption align="middle">blurred edge image</figcaption>
+                    <img src="./output/cameraman_blurred.jpg" align="middle" width="300px">
+                </td>
+                </tr>
+            </tbody></table>
+        </div>
+    <br>
+    <br>
+    <h2 align="left">Part 2.1: Image "Sharpening"</h2>
+        <p><b>Unsharp Mask Filter Algorithm</b></p>
+        <ol>
+            <li>First, create the low frequency iamge by using gaussian blur method.</li>
+            <li>Use some resizing techniques to match the original image to low frequency image dimensions.</li>
+            <li>Extract the high frequency image by subtracting low frequency image from original image.</li>  
+            <li>Add the high frequency image (multiplied by some alpha factor) back to the orignal image.</li>
+        </ol>
+        <br>
+            Here are a few examples below:
+        <br>
+        <div align="middle" >
+            <br><table style="width=100%">
+                <tbody><tr>
+                  <td>
+                      <figcaption align="middle">Original Image</figcaption>
+                      <img src="./data/taj.jpg" align="middle" width="250px">
+                  </td>
+                  <td>
+                    <figcaption align="middle">Low Frequency Taj</figcaption>
+                    <img src="./output/low_filter_taj.jpg"  align="middle" width="250px">
+                 </td>
+                  <td>
+                      <figcaption align="middle">High Frequency Taj</figcaption>
+                      <img src="./output/high_filter_taj.jpg" align="middle" width="250px">
+                  </td>
+                  <td>
+                      <figcaption align="middle">Sharp Taj</figcaption>
+                      <img src="./output/sharp_taj.jpg" align="middle" width="250px">
+                  </td>
+                </tr>
+              </tbody></table>
+              <br><table style="width=100%">
+                <tbody><tr>
+                  <td>
+                      <figcaption align="middle">Original Image</figcaption>
+                      <img src="./data/bellagio.jpeg" align="middle" width="250px">
+                  </td>
+                  <td>
+                    <figcaption align="middle">Low Frequency Bellagio</figcaption>
+                    <img src="./output/low_filter_bellagio.jpg"  align="middle" width="250px">
+        
+                </td>
+                  <td>
+                      <figcaption align="middle">High Frequency Bellagio</figcaption>
+                      <img src="./output/high_filter_bellagio.jpg" align="middle" width="250px">
+                  </td>
+                  <td>
+                      <figcaption align="middle">Sharp Bellagio</figcaption>
+                      <img src="./output/sharp_bellagio.jpg" align="middle" width="250px">
+                  </td>
+                </tr>
+              </tbody></table>
+        <br>
+            <p align="left">
+                Below is an example of a sharp image that is blurred and resharpened:
+            </p>
+        <br>
+        <br><table style="width=100%">
+            <tbody><tr>
+              <td>
+                  <figcaption align="middle">Sharp Original</figcaption>
+                  <img src="./data/landscape.jpeg" align="middle" width="300px">
+              </td>
+              <td>
+                <img src="./data/blank.png" align="middle" width="100px">
+            </td>
+              <td>
+                <figcaption align="middle">Resharpened Image</figcaption>
+                <img src="./output/resharpened.jpg"  align="middle" width="300px">
+              </td>
+            </tr>
+          </tbody></table>
+          <br>
+            <p align="left">
+                As you can see, the image looks very harsh and grainy. The colors are not very blended together and the details are overly emphasized,
+                creating a discontinous image that looks very unnatural.
+            </p>
+          <br>
+        </div>
+    <br>
+
+    <h2 align="left">Part 2.2: Hybrid Images</h2>
+    <p><b>Hybrid Image Algorithm</b></p>
+    <ol>
+        <li>First, create the low frequency iamge by using gaussian blur method.</li>
+        <li>Use some resizing techniques to match the original image to low frequency image dimensions.</li>
+        <li>Extract the high frequency image by subtracting low frequency image from original image.</li>  
+        <li>Add the high frequency image (multiplied by some alpha factor) back to the orignal image.</li>
+    </ol>
+    <br>
+        Note: In the high frequency image, the more detailed image should be more prominent. 
+        I made the low frequency image small to simulate viewing it from farther away. 
+        In this image, the blurry image should be more prominent. 
+        <br>
+        <br>
+        The hybrid images can be seen below:
+    <br>
+    <div align="middle" >
+    <br><table style="width=100%">
+        <tbody><tr>
+            <td>
+                <figcaption>Matt Damon</figcaption>
+                <img src="./data/matt.jpeg" align="middle" width="200px">
+            </td>
+            <td>
+              <img src="./data/plus.png"  align="middle" width="50px">
+           </td>
+            <td>
+                <figcaption>Queen</figcaption>
+                <img src="./data/queen.jpeg" align="middle" width="200px">
+            </td>
+            <td>
+              <img src="./data/arrow.png"  align="middle" width="50px">
+           </td>
+            <td>
+                <figcaption>High Freq Image</figcaption>
+                <img src="./output/matt_queen.jpg" align="middle" width="200px">
+            </td>
+            <td>
+                <img src="./data/blank.png"  align="middle" width="50px">
+             </td>
+            <td>
+                <figcaption>Low Freq Image</figcaption>
+                <img src="./output/matt_queen.jpg" align="middle" width="50px">
+            </td>
+          </tr>
+      </tbody></table>
+        <br><table style="width=100%">
+            <tbody><tr>
+              <td>
+                <figcaption>Walter White</figcaption>
+                  <img src="./data/walter.jpeg" align="middle" width="200px">
+              </td>
+              <td>
+                <img src="./data/plus.png"  align="middle" width="50px">
+             </td>
+              <td>
+                <figcaption>Dog</figcaption>
+                  <img src="./data/dog.jpeg" align="middle" width="200px">
+              </td>
+              <td>
+                <img src="./data/arrow.png"  align="middle" width="50px">
+             </td>
+              <td>
+                  <figcaption>High Freq Image</figcaption>
+                  <img src="./output/walter_dog.jpg" align="middle" width="200px">
+              </td>
+              <td>
+                <img src="./data/blank.png"  align="middle" width="50px">
+             </td>
+              <td>
+                <figcaption>Low Freq Image</figcaption>
+                <img src="./output/walter_dog.jpg" align="middle" width="50px">
+              </td>
+            </tr>
+          </tbody></table>
+        
+          <br>
+            <h3 align="left">Frequency Analysis</h3>
+            <p align="left">
+                This section shows how the Walter White / Dog hybrid image is created but in the frequency space.
+            </p>
+            <p align="left">
+              Below we can see the extraction of the low and high frequencies from the original images:
+            </p>
+          <br>
+          <br><table style="width=100%">
+            <tbody><tr>
+                <td>
+                    <figcaption>Walter White</figcaption>
+                    <img src="./output/walter_freq.jpg" align="middle" width="200px">
+                </td>
+                <td>
+                    <img src="./data/arrow.png"  align="middle" width="50px">
+                 </td>
+                <td>
+                    <figcaption>Low Freq Walter White</figcaption>
+                    <img src="./output/low_freq_walter.jpg" align="middle" width="200px">
+                </td>
+                <td>
+                    <img src="./data/blank.png"  align="middle" width="50px">
+                 </td>
+                <td>
+                    <figcaption>Dog</figcaption>
+                    <img src="./output/dog_freq.jpg" align="middle" width="200px">
+                </td>
+                <td>
+                    <img src="./data/arrow.png"  align="middle" width="50px">
+                 </td>
+                <td>
+                    <figcaption>High Freq Dog</figcaption>
+                    <img src="./output/high_freq_dog.jpg" align="middle" width="200px">
+                </td>
+              </tr>
+          </tbody></table>
+          <p align="left">
+            Now we combine the low and high frequencies to form our hybrid image:
+          </p>
+          <br><table style="width=100%">
+            <tbody><tr>
+                <td>
+                    <figcaption>Low Freq Walter White</figcaption>
+                    <img src="./output/low_freq_walter.jpg" align="middle" width="200px">
+                </td>
+                <td>
+                    <img src="./data/plus.png"  align="middle" width="50px">
+                 </td>
+                <td>
+                    <figcaption>High Freq Dog</figcaption>
+                    <img src="./output/high_freq_dog.jpg" align="middle" width="200px">
+                </td>
+                <td>
+                    <img src="./data/arrow.png"  align="middle" width="50px">
+                 </td>
+                <td>
+                    <figcaption>Hybrid Image</figcaption>
+                    <img src="./output/hybrid_freq.jpg" align="middle" width="200px">
+                </td>
+              </tr>
+          </tbody></table>
+
+          <br>
+            <p align="left">
+            Below is an example of a failed hybrid image:
+            </p>
+          <br>
+          <br><table style="width=100%">
+            <tbody><tr>
+                <td>
+                    <figcaption>Leonardo DiCaprio</figcaption>
+                    <img src="./data/leo.jpeg" align="middle" width="200px">
+                </td>
+                <td>
+                  <img src="./data/plus.png"  align="middle" width="50px">
+               </td>
+                <td>
+                    <figcaption>Chris Pratt</figcaption>
+                    <img src="./data/chris.jpeg" align="middle" width="200px">
+                </td>
+                <td>
+                  <img src="./data/arrow.png"  align="middle" width="50px">
+               </td>
+                <td>
+                    <figcaption>High Freq Image</figcaption>
+                    <img src="./output/leo_chris.jpg" align="middle" width="200px">
+                </td>
+              </tr>
+          </tbody></table>
+          <br>
+            <p align="left">
+            This one doesn't really work since there is no good way to line up the features.
+            The orientation of Chris Pratt and Leonardo DiCaprio in the original images are just too offset 
+            so the aligning image algorithm does not work very well. 
+            </p>
+          <br>
+
+        <div align="left">
+            <h2 align="left">Part 2.3: Gaussian and Laplacian Stacks</h2>
+            <p><b>Gaussian Stack Algorithm</b></p>
+                <ol>
+                    <li>Add the original image to the stack</li>
+                    <li>Loop X times, where X is the number of levels you want</li>
+                    <ul>
+                        <li>Blur previous image in stack using a gaussian kernel</li>
+                        <li>Add blurred image to stack</li>
+                    </ul>
+                </ol>
+            <p><b>Laplacian Stack Algorithm</b></p>
+                <ol>
+                    <li>Create the guassian stack with original image</li>
+                    <li>Iterate through Gaussian stack</li>
+                    <ul>
+                        <li>Perform current element minus next element to create high frequency image</li>
+                        <li>Add high frequency image to stack</li>
+                    </ul>
+                </ol>
+
+            <div align="middle" >
+                <h3 align="left">Gaussian Stack</h3>
+                <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Level 1</figcaption>
+                            <img src="./output/apple-ga-0.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <figcaption>Level 2</figcaption>
+                          <img src="./output/apple-ga-1.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 3</figcaption>
+                            <img src="./output/apple-ga-2.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 4</figcaption>
+                            <img src="./output/apple-ga-3.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 5</figcaption>
+                            <img src="./output/apple-ga-4.jpg" align="middle" width="150px">
+                        </td>
+                      </tr>
+                  </tbody></table>
+                  <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Level 1</figcaption>
+                            <img src="./output/orange-ga-0.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <figcaption>Level 2</figcaption>
+                          <img src="./output/orange-ga-1.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 3</figcaption>
+                            <img src="./output/orange-ga-2.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 4</figcaption>
+                            <img src="./output/orange-ga-3.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 5</figcaption>
+                            <img src="./output/orange-ga-4.jpg" align="middle" width="150px">
+                        </td>
+                      </tr>
+                  </tbody></table>
+                  <h3 align = "left">Laplacian Stack</h3>
+                  <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Level 1</figcaption>
+                            <img src="./output/apple-la-0.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <figcaption>Level 2</figcaption>
+                          <img src="./output/apple-la-1.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 3</figcaption>
+                            <img src="./output/apple-la-2.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 4</figcaption>
+                            <img src="./output/apple-la-3.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 5</figcaption>
+                            <img src="./output/apple-la-4.jpg" align="middle" width="150px">
+                        </td>
+                      </tr>
+                  </tbody></table>
+                  <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Level 1</figcaption>
+                            <img src="./output/orange-la-0.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <figcaption>Level 2</figcaption>
+                          <img src="./output/orange-la-1.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 3</figcaption>
+                            <img src="./output/orange-la-2.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 4</figcaption>
+                            <img src="./output/orange-la-3.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 5</figcaption>
+                            <img src="./output/orange-la-4.jpg" align="middle" width="150px">
+                        </td>
+                      </tr>
+                  </tbody></table> 
+            </div>
+
+            <br>
+            <div align="left">
+                <h2 align="left">Part 2.4: Multiresolution Blending</h2>
+                <p><b>Blending Algorithm</b></p>
+                <ol>
+                    <li>Create Laplacian stack for image 1 and image 2</li>
+                    <li>Create a Gaussian stack for the mask image</li>
+                    <li>Loop through each layer of the laplacian stack
+                        <ul>
+                            <li>Create a blended image using: gr[i] * la[i] + (1-gr[i]) * lb[i]</li>
+                            <li>This applies the current mask to the laplacians of the two images</li>
+                        </ul> 
+                    </li>
+                    <li>Sum each element in the blended laplacian stack (including the lowest frequency blended image)</li>
+                </ol>
+            
+                <div align="middle">
+                <h3 align="left">Oraple Example</h3>
+                <table style="width=100%">
+                    <table style="width=100%">
+                        <tbody><tr>
+                            <td>
+                                <img src="./output/apple-ga-0.jpg" align="middle" width="150px">
+                            </td>
+                            <td>
+                              <img src="./output/orange-ga-0.jpg"  align="middle" width="150px">
+                           </td>
+                            <td>
+                                <img src="./output/oraple_mask.jpg"  align="middle" width="150px">
+                           </td>
+                           <td>
+                                <img src="./data/arrow.png" align="middle" width="50px">
+                          </td>
+                           <td>
+                               <img src="./output/oraple.jpg" align="middle" width="150px">
+                          </td>
+                          </tr>
+                      </tbody></table>   
+                      
+                <p align="left"><b>Blended Laplacian Stack</b></p>
+                <p align="left">Note: The last level displayed is the lowest frequency of the gaussian stack that is used to reconstruct the image</p>
+                <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Level 1</figcaption>
+                            <img src="./output/blended-0.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <figcaption>Level 2</figcaption>
+                          <img src="./output/blended-1.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 3</figcaption>
+                            <img src="./output/blended-2.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 4</figcaption>
+                            <img src="./output/blended-3.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 5</figcaption>
+                            <img src="./output/blended-4.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 6</figcaption>
+                            <img src="./output/blended-5.jpg" align="middle" width="150px">
+                        </td>
+                      </tr>
+                  </tbody></table> 
+                 <br><br>
+                <h3 align="left">Berkeley Bear Example</h3>
+                <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <img src="./data/sathergate.jpeg" align="middle" width="200px">
+                        </td>
+                        <td>
+                            <img src="./output/bear.jpg" align="middle" width="200px">
+                        </td>
+                        <td>
+                            <img src="./output/bear_mask.jpg" align="middle" width="200px">
+                        </td>
+                        <td>
+                            <img src="./data/arrow.png" align="middle" width="50px">
+                        </td>
+                        <td>
+                            <img src="./output/berkeley_bear.jpg" align="middle" width="200px">
+                        </td>
+                      </tr>
+                  </tbody></table> 
+                  <br><br>
+                <h3 align="left">Dog in Cal Game Example</h3>
+                <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <img src="./data/cal_game.jpeg" align="middle" width="200px">
+                        </td>
+                        <td>
+                            <img src="./data/great_dane.jpeg" align="middle" width="200px">
+                        </td>
+                        <td>
+                            <img src="./data/dane_mask.png" align="middle" width="200px">
+                        </td>
+                        <td>
+                            <img src="./data/arrow.png" align="middle" width="50px">
+                        </td>
+                        <td>
+                            <img src="./output/dane_in_cal_game.jpg" align="middle" width="200px">
+                        </td>
+                      </tr>
+                  </tbody></table> 
+                  <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Level 1</figcaption>
+                            <img src="./output/cal-la-0.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <figcaption>Level 2</figcaption>
+                          <img src="./output/cal-la-1.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 3</figcaption>
+                            <img src="./output/cal-la-2.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 4</figcaption>
+                            <img src="./output/cal-la-3.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 5</figcaption>
+                            <img src="./output/cal-la-4.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 6</figcaption>
+                            <img src="./output/cal-la-5.jpg" align="middle" width="150px">
+                        </td>
+                      </tr>
+                  </tbody></table> 
+                  <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Level 1</figcaption>
+                            <img src="./output/dane-la-0.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <figcaption>Level 2</figcaption>
+                          <img src="./output/dane-la-1.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 3</figcaption>
+                            <img src="./output/dane-la-2.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 4</figcaption>
+                            <img src="./output/dane-la-3.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 5</figcaption>
+                            <img src="./output/dane-la-4.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 6</figcaption>
+                            <img src="./output/dane-la-5.jpg" align="middle" width="150px">
+                        </td>
+                      </tr>
+                  </tbody></table> 
+                  <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption>Level 1</figcaption>
+                            <img src="./output/blended-cal-0.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                          <figcaption>Level 2</figcaption>
+                          <img src="./output/blended-cal-1.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 3</figcaption>
+                            <img src="./output/blended-cal-2.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 4</figcaption>
+                            <img src="./output/blended-cal-3.jpg"  align="middle" width="150px">
+                       </td>
+                        <td>
+                            <figcaption>Level 5</figcaption>
+                            <img src="./output/blended-cal-4.jpg" align="middle" width="150px">
+                        </td>
+                        <td>
+                            <figcaption>Level 6</figcaption>
+                            <img src="./output/blended-cal-5.jpg" align="middle" width="150px">
+                        </td>
+                      </tr>
+                  </tbody></table> 
+                
+                </div>
+        </div>
+    </div>
+<br>
+<br>
+</div></body></html>

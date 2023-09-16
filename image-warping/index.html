@@ -1,0 +1,407 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+    <style>
+      body {
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: 'Verdana', sans-serif;
+        color: #121212;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Verdana', sans-serif;
+      }
+    </style>
+    <title>CS 194-26: Project 4B</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+    </head>
+    
+    <body>
+
+    <h1 align="left">Project 4A:  IMAGE WARPING and MOSAICING</h1>
+
+    <br><br>
+
+    <div>
+
+        <h2 align="left">Part 1. Shoot the Pictures</h2>
+        <p>Here are some images I took around Berkeley:</p>
+     <div align="middle">
+         <br><table style="width=100%">
+           <tbody><tr>
+             <td>
+                 <img src="./data/campus_1.jpg" align="middle" width="250px">
+             </td>
+             <td>
+                 <img src="./data/campus_2.jpg" align="middle" width="250px">
+             </td>
+             <td>
+                 <img src="./data/regent_1.jpg" align="middle" width="250px">
+             </td>
+             <td>
+                 <img src="./data/regent_2.jpg" align="middle" width="250px">
+             </td>
+           </tr>
+         </tbody></table>
+         <br><table style="width=100%">
+             <tbody><tr>
+               <td>
+                   <img src="./data/room_1.jpg" align="middle" width="250px">
+               </td>
+               <td>
+                   <img src="./data/room_2.jpg" align="middle" width="250px">
+               </td>
+             </tr>
+           </tbody></table>
+       </div>
+     
+     <br>
+     <br>
+     
+     <h2 align="left">Part 2. Recover Homographies</h2>
+     <p><b>Homography Algorithm</b></p>
+     <ol>
+         <li>Select correspondence points between two images</li>
+         <li>Generate A matrix with two rows per pair of points and b vector (see image below)</li>
+         <li>Use least squares to solve homography weights</li>  
+         <li>Multiply homography matrix by coordinate matrix to generate new coordinates</li>
+         <li>Create bounding box for new image my subtracting max and min (x,y) values</li>
+         <li>Shift all the new coordinates by the minimum value in both x,y directions</li>
+         <li>Set the pixels in new image to corresponding pixels in original image</li>
+         <li>Interpolate the new image to fill in missing values (use alpha mask for weird shapes)</li>
+     </ol>
+         <br>
+         <div align="middle" >
+             <br><table style="width=100%">
+                 <tbody><tr>
+                     <td>
+                         <img src="./data/homography.jpg" align="middle" width="500px">
+                     </td>
+                 </tr>
+             </tbody></table>
+         </div>
+     <br>
+     <br>
+     <h2 align="left">Part 3. Image Rectification</h2>
+         <p><b>Rectify Algorithm</b></p>
+         <p>For image rectification, I needed to generate the corresponding points by using the difference between max x and y values, 
+             and then creating a bounding box for the new image. I then computed the homography matrix with these two sets of points and 
+             used this to project the image into a new persepctive space.
+         </p>
+         <br>
+           Example 1:
+         <br>
+         <div align="middle" >
+             <br><table style="width=100%">
+                 <tbody><tr>
+                   <td>
+                       <img src="./data/menu.jpeg" align="middle" height="200px">
+                   </td>
+                   <td>
+                     <img src="./output/rectified_menu.jpg" align="middle" height="200px">
+                 </td>
+               </tbody></table>
+           <br>
+         </div>
+         <br>
+           Example 2:
+         <br>
+         <div align="middle" >
+             <br><table style="width=100%">
+                 <tbody><tr>
+                   <td>
+                       <img src="./data/chik.jpeg" align="middle" height="200px">
+                   </td>
+                   <td>
+                     <img src="./output/rectified_chik.jpg" align="middle" width="200px">
+                 </td>
+               </tbody></table>
+           <br>
+         </div>
+     <br>
+ 
+     <h2 align="left">Part 4. Blend the images into a mosaic</h2>
+     <p>For this section, I converted one image into the coordinate space of the second image. I then aligned the images
+         based on their correspondence points and blurred the overlapping line. 
+     </p>
+     
+     <br>
+         Example 1:
+     <br>
+     <div align="middle" >
+     <table style="width=100%">
+             <tbody><tr>
+               <td>
+                   <img src="./data/campus_1.jpg" align="middle" width="200px">
+               </td>
+               <td>
+                   <img src="./data/campus_2.jpg" align="middle" width="200px">
+               </td>
+               <td>
+                    <img src="./output/campus_mosaic_blend_x.jpg" align="middle" width="350px">
+                 </td>
+             </tr>
+     </tbody></table>
+     </div>
+ 
+     <br>
+         Example 2:
+     <br>
+     <div align="middle" >
+     <table style="width=100%">
+             <tbody><tr>
+               <td>
+                   <img src="./data/regent_1.jpg" align="middle" width="200px">
+               </td>
+               <td>
+                   <img src="./data/regent_2.jpg" align="middle" width="200px">
+               </td>
+               <td>
+                    <img src="./output/regent_mosaic_blend_x.jpg" align="middle" width="350px">
+                 </td>
+             </tr>
+     </tbody></table>
+     </div>
+ 
+     <br>
+         Example 3:
+     <br>
+     <div align="middle" >
+     <table style="width=100%">
+             <tbody><tr>
+               <td>
+                   <img src="./data/room_1.jpg" align="middle" width="200px">
+               </td>
+               <td>
+                   <img src="./data/room_2.jpg" align="middle" width="200px">
+               </td>
+               <td>
+                    <img src="./output/room_mosaic_blend_x.jpg" align="middle" width="350px">
+                 </td>
+             </tr>
+     </tbody></table>
+     </div>
+ 
+     <h2 align="left">Part 5. Tell us what you've learned</h2>
+     <p>I learned the importance of image alignment in making a mosaic look good. I had trouble finding the exact offsets to combine 
+         the two images, but when I finally got it, it looked amazing. I also learned about how tricky coordiante transformations could be
+         and that not all the new points would be valid, so I had to dive deep into the shifting process.
+     </p>
+
+    <br><br>
+    <h1 align="left">Project 4B: FEATURE MATCHING for AUTOSTITCHING</h1>
+    <br><br>
+    
+    <h2 align="left">Part 1. Detecting corner features in an image</h2>
+    <p>For this section, I first found Harris Corners of the image, which also produced a map of the image based on their Harris values.
+        I then ran the ANMS algorithm described below to produce good corner points that were also well-distributed across the image.
+    </p>
+    
+    <p><b>Adaptive Non-Maximal Suppression Algorithm</b></p>
+    <ol>
+        <li>For each interest point, find the corners that are stronger than it by factor of 1/c</li>
+        <li>Find the distance between current interest point and the list of stronger points</li>
+        <li>Set the radius of current interest point to minimum distance to strong point</li>
+        <li>Sort the interest points based on suppression radius</li>
+        <li>Return the top X number of interest points with largest radiuses</li>
+    </ol>
+    <div align="middle">
+        <br><table style="width=100%">
+            <tbody><tr>
+                <td>
+                    <figcaption>Harris Values Map</figcaption>
+                    <img src="./output/doe_1-harris.jpg" align="left" width="400px">
+                </td>
+                <td>
+                    <figcaption>Interest Points after ANMS</figcaption>
+                    <img src="./output/doe_1-corners.jpg" align="right" width="400px">
+                </td>
+              </tr>
+            </tbody></table>
+      </div>
+    
+    <br>
+    <br>
+    
+    <h2 align="left">Part 2. Extracting a Feature Descriptor for each feature point</h2>
+    <p>For this section, I defined the feature descriptors by setting a window with each interest point as the center. In this case, I set the window size to be 40x40 and then downsampled 
+        by a factor of 5. Below, I have selected a few interest points and their corresponding feature descriptors:  </p>
+        
+        <div align="middle" >
+            <p align="left"></p>
+            <br><table align="left" style="width=50%">
+                <tbody><tr>
+                    <td>
+                        <figcaption>Picture 1</figcaption>
+                        <img src="./output/doe_1-feature-boxes.jpg" align="middle" height="350px">
+                    </td>
+                </tr>
+            </tbody></table>
+            <br><table style="width=50%">
+                <tbody><tr>
+                    <td>
+                        <figcaption>F0</figcaption>
+                        <img src="./output/doe_1-fd-0.jpg" align="middle" height="150px">
+                    </td>
+                    <td>
+                        <figcaption>F1</figcaption>
+                        <img src="./output/doe_1-fd-1.jpg" align="middle" height="150px">
+                    </td>
+                </tr>
+            </tbody></table>
+            <br><table style="width=50%">
+                <tbody><tr>
+                    <td>
+                        <figcaption>F2</figcaption>
+                        <img src="./output/doe_1-fd-2.jpg" align="middle" height="150px">
+                    </td>
+                    <td>
+                        <figcaption>F3</figcaption>
+                        <img src="./output/doe_1-fd-3.jpg" align="middle" height="150px">
+                    </td>
+                </tr>
+            </tbody></table>
+            <br><table align="left" style="width=50%">
+                <tbody><tr>
+                    <td>
+                        <figcaption>Picture 2</figcaption>
+                        <img src="./output/doe_2-feature-boxes.jpg" align="middle" height="350px">
+                    </td>
+                </tr>
+            </tbody></table>
+            <br><table style="width=50%">
+                <tbody><tr>
+                    <td>
+                        <figcaption>F0</figcaption>
+                        <img src="./output/doe_2-fd-0.jpg" align="middle" height="150px">
+                    </td>
+                    <td>
+                        <figcaption>F1</figcaption>
+                        <img src="./output/doe_2-fd-1.jpg" align="middle" height="150px">
+                    </td>
+                </tr>
+            </tbody></table>
+            <br><table style="width=50%">
+                <tbody><tr>
+                    <td>
+                        <figcaption>F2</figcaption>
+                        <img src="./output/doe_2-fd-2.jpg" align="middle" height="150px">
+                    </td>
+                    <td>
+                        <figcaption>F3</figcaption>
+                        <img src="./output/doe_2-fd-3.jpg" align="middle" height="150px">
+                    </td>
+                </tr>
+            </tbody></table>
+
+            </tbody></table>
+        </div>
+    <br>
+    <br>
+    <h2 align="left">Part 3. Matching these feature descriptors between two images</h2>
+        <p><b>Feature Matching Algorithm</b></p>
+        <p>To find the best feature matches, I itereated trhough the feature descriptors of each image and took the mean
+            squared error between every pair. I then kept track of the 1-NN and 2-NN for each feature descriptor based
+            on this similairty value. After finding the best matches for each feature, I filtered out any features that had 
+            a ratio of 1-NN/2-NN above a certain threshold since the match was probably not confident enough. Below are the 
+            remaining features and their corresponding matches.
+        </p>
+        <br>
+          Matching features:
+        <br>
+        <div align="middle" >
+            <br><table style="width=100%">
+                <tbody><tr>
+                  <td>
+                      <img src="./output/doe_1-matches.jpg" align="middle" height="300px">
+                  </td>
+                  <td>
+                    <img src="./output/doe_2-matches.jpg" align="middle" height="300px">
+                </td>
+              </tbody></table>
+          <br>
+
+        
+        </div>
+    <br>
+
+    <h2 align="left">Part 4. Use a robust method (RANSAC) to compute a homography </h2>
+    <p><b>RANSAC Algorithm</b></p>
+        <ol>
+            <li>Choose 4 random points from the feature matches and compute homography</li>
+            <li>Find warped pts by multiplying "moving" matches by homography matrix</li>
+            <li>Compare the warped pts to the "fixed" matches in second image</li>
+            <li>Repeat this process X number of iterations in loop (for this one I chose 10)</li>
+            <li>Choose the homography with the greatest number of inliers</li>
+        </ol>
+    
+    <p>Below you can see the number of matches was slightly reduced since outliers were removed, but 
+        the best matches stayed. These matches will be used to compute the homography for warping! See matches after RANSAC below:
+    </p>
+    <div align="middle" >
+    <table style="width=100%">
+            <tbody><tr>
+              <td>
+                  <img src="./output/doe_1-ransac.jpg" align="middle" width="400px">
+              </td>
+              <td>
+                  <img src="./output/doe_2-ransac.jpg" align="middle" width="400px">
+              </td>
+            </tr>
+    </tbody></table>
+
+    
+    </div>
+
+    <br>
+    <h2 align="left">Part 5. Produce a mosaic</h2>
+    <p>For this section, I simplied used my warping code from Part A and instead of the manully selected points, I used the auto detected feature 
+        matches after RANSAC. </p>
+
+    <p>Example 1:</p>
+    <div align="middle" >
+        <table style="width=100%">
+                <tbody><tr>
+                   <td>
+                        <img src="./output/doe-auto-mosaic.jpg" align="middle" width="450px">
+                   </td>
+                 </tr>
+        </tbody></table>
+
+    <p align="left">Example 2:</p>
+    <table style="width=100%">
+        <tbody><tr>
+            <td>
+                <img src="./output/kresge-auto-mosaic.jpg" align="middle" width="450px">
+            </td>
+            </tr>
+    </tbody></table>
+
+
+    <p align="left">Here is an example from Part A. You can see the auto-stitch and manually stitched side by side:</p>
+        <table style="width=100%">
+            <tbody><tr>
+               <td>
+                    <figcaption>Auto-stitched</figcaption>
+                    <img src="./output/room-auto-mosaic.jpg" align="middle" height="300px">
+               </td>
+              <td>
+                    <figcaption>Manually Stitched</figcaption>
+                   <img src="./output/room_mosaic_blend_x.jpg" align="middle" height="300px">
+              </td>
+            </tr>
+    </tbody></table>
+</div>
+
+<br>
+<h2 align="left">Part 6. What have you learned?</h2>
+<p>I thought the RANSAC alogrithm was super cool. It was impressive how well it got rid of outliers and set up the correct homography.
+    I did notice that the auto stitching did really well for detailed images. It also seemed more natural than the manual stitch.
+    However, when there were more patterns in images (like big stretches of sky and grass) then the manual stitching was better.</p>
+    
+
+<br>
+<br>
+</div></body></html>

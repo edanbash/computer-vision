@@ -1,0 +1,481 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+    <style>
+      body {
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: 'Verdana', sans-serif;
+        color: #121212;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Verdana', sans-serif;
+      }
+    </style>
+    <title>CS 194-26: Gradient Domain Fusion</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+    </head>
+    
+    <body>
+
+    <h1 align="left">Final Project 1:  Gradient Domain Fusion</h1>
+
+    <br><br>
+
+    <div>
+
+        <h2 align="left">Part 2.1 Toy Problem</h2>
+        <p><b>Algorithm Description:</b></p>
+        <p>In order to calculate the image based on gradients, I first ran thought the x coordinates and subtracted adjacent source pixels. This is the same idea from 
+            previous project where we applied a dx kernel and convolved it with the entire image. While looping through the coordinates, I also assigned 1s and -1s to the indices 
+            of the next pixel and current pixel, respectively. I also used a special index matrix to help make the A matrix easier to index into.  At the end of the process,
+            each row only consisted of two values at maximum. I repeated this same process for the y coordinates.
+        </p>
+        <p>An important thing to note is that the A matrix becomes very large. There are essentially double the amount of equations as pixels since we compare all adjacent pairs and 
+            loop through both x and y separately. However, I noticed that since the matrix was sparse, I could take advantage of the scipy sparse matrix library. I converted the A matrix 
+            to a csr_matrix and this allowed least squares to be solved in seconds instead of several minutes!
+        </p>
+        
+        <div align="middle">
+            <br><table style="width:100%">
+              <tbody><tr>
+                <td>
+                    <figcaption>Conceptual Idea</figcaption>
+                    <img src="./samples/toy_code2.png" align="middle" width="250px" vspace="5px">
+                    
+                    <figcaption>Code Implementation</figcaption>
+                    <img src="./samples/toy_code.png"  width="250px">
+                </td>
+                <td>
+                    
+                </td>
+                <td>
+                    <figcaption>Original Image</figcaption>
+                    <img src="./samples/toy_problem.png" align="middle" width="250px">
+                </td>
+                <td>
+                    <figcaption>Reconstructed Image</figcaption>
+                    <img src="./output/reconstructed_toy.jpg" align="middle" width="250px">
+                </td>
+              </tr>
+            </tbody></table>
+        </div>
+
+        <br>
+        <br>
+        
+     
+     <br>
+     <br>
+     
+     <h2 align="left">Part 2.2 Poisson Blending</h2>
+        <p><b>Algorithm Description:</b></p>
+        <p>After implementing the toy example, we had to make a few changes for the full algorithm. The most obvious one was that we now had to combine two
+            images of different sizes. I first implemented some helper functions to pick the "mount point" on the target image and then replace the old pixels of the target with the 
+            blended source image. 
+        </p>
+        <p>The biggest issue was determining the equations at the border since this is where the two images mismatched most clearly. The solution was to include both the target image 
+            pixel next to the border as well as the difference of pixels within the source image. I originally was using just the target pixel at the border and it still worked, but adding in the source difference made a 
+            slightly smoother transition. 
+        </p>
+        <p>For efficiency sake, I also made separate loops for creating the A and b matrices. The reason for this was that the A matrix took much longer to compute, but it was universal
+            across channels as it did not depend on pixel values. The b vector, on the other hand, was channel-dependent and had to be recomputed for each rgb channel. The least squares
+            problem was again solved using the scipy sparse matrix library.
+        </p>
+
+        <p><b>Implementation Details</b></p>
+        <br><table style="width:100%">
+            <tbody><tr>
+              <td>
+                <figcaption>Optimization Problem</figcaption>
+                <img src="./samples/blending_code2.png" width="400px" vspace="20px">
+                <figcaption>Driver Code</figcaption>
+                  <img src="./samples/blending_code.png" align="middle" width="400px">
+              </td>
+              <td>
+                <figcaption>B vector creation</figcaption>
+                <img src="./samples/blended_code4.png" align="middle" height="300px" vspace="10px">
+                <figcaption>Note the border cases!</figcaption>
+            </td>
+          </tr>
+          </tbody></table>
+
+
+         <br>
+         <div align="middle">
+            <h3 align="left">Example 1</h3>
+            <br><table style="width:100%">
+              <tbody><tr>
+                <td>
+                    <img src="./samples/snow.jpg" align="middle" width="250px">
+                </td>
+                <td>
+                    <img src="./samples/penguin.jpg" align="middle" width="50px" hspace="50px">
+                </td>
+                <td>
+                    <img src="./samples/arrow.png" align="middle" width="50px">
+                </td>
+                <td>
+                    <figcaption>With Blending</figcaption>
+                    <img src="./output/blendedl1.jpg" align="middle" width="300px">
+                </td>
+                <td>
+                    <figcaption>No Blending</figcaption>
+                    <img src="./output/original1.jpg" align="middle" width="300px">
+                </td>
+            </tr>
+            </tbody></table>
+            <p align="left"><b>Analysis:</b> The blend here works very well since the background of the penguin images matches the snowy white background. You
+            can see a slight coloration change, but it not a jarring to the observer.</p><br>
+
+
+            <h3 align="left">Example 2</h3>
+            <br><table style="width:100%">
+                <tbody><tr>
+                  <td>
+                      <img src="./samples/ocean.jpg" align="middle" width="250px">
+                  </td>
+                  <td>
+                      <img src="./samples/bear.png" align="middle" width="150px" vspace="5px">
+                      <img src="./samples/swimmer.png" align="middle" width="150px">
+                  </td>
+                  <td>
+                    <img src="./samples/arrow.png" align="middle" width="50px">
+                </td>
+                  <td>
+                      <figcaption>With Blending</figcaption>
+                      <img src="./output/blended2.jpg" align="middle" width="300px">
+                  </td>
+                  <td>
+                      <figcaption>No Blending</figcaption>
+                      <img src="./output/original2.jpg" align="middle" width="300px">
+                  </td>
+              </tr>
+              </tbody></table>
+              <p align="left"><b>Analysis:</b> The blend here works pretty good since I was able to find images with matching water colors which helped the objects
+                to keep most of their original color. However, there is less of a smooth transition compared to other examples due to the texture of the water. 
+                It has way more details which is why we see more artifacts on the border between source and target image.</p><br>
+
+            <h3 align="left">Example 3</h3>
+            <br><table style="width:100%">
+                <tbody><tr>
+                  <td>
+                      <img src="./samples/skyline.jpg" align="middle" width="250px">
+                  </td>
+                  <td>
+                      <img src="./samples/dino.jpg" align="middle" width="150px" vspace="5px">
+                      <img src="./samples/plane.png" align="middle" width="150px">
+                  </td>
+                  <td>
+                    <img src="./samples/arrow.png" align="middle" width="50px">
+                </td>
+                  <td>
+                      <figcaption>With Blending</figcaption>
+                      <img src="./output/blended4.jpg" align="middle" width="300px">
+                  </td>
+                  <td>
+                      <figcaption>No Blending</figcaption>
+                      <img src="./output/original4.jpg" align="middle" width="300px">
+                  </td>
+              </tr>
+              </tbody></table>
+              <p align="left"><b>Analysis:</b> This example does a very good job of blending into the sky. This seems to be the case since the background of the inserted images 
+                are both solid colors and can be easily morphed into the target image. However, one downside is that the original colors of the images (i.e. pterodactyl) become very distorted.
+                This is due to the contrasting white background of the pterodactyl image and the blue background of the skyline image.</p><br>
+
+              <h3 align="left">Example 4</h3>
+              <br><table style="width:100%">
+                  <tbody><tr>
+                    <td>
+                        <img src="./samples/snow2.jpg" align="middle" width="250px">
+                    </td>
+                    <td>
+                        <img src="./samples/chick.jpg" align="middle" width="100px" hspace="25px">
+                    
+                    </td>
+                    <td>
+                      <img src="./samples/arrow.png" align="middle" width="50px">
+                  </td>
+                    <td>
+                        <figcaption>With Blending</figcaption>
+                        <img src="./output/blended3.jpg" align="middle" width="250px" hspace="25px">
+                    </td>
+                    <td>
+                        <figcaption>No Blending</figcaption>
+                        <img src="./output/original3.jpg" align="middle" width="250px" hspace="25px">
+                    </td>
+                </tr>
+                </tbody></table>
+                <p align="left"><b>Analysis:</b> This is a great example of the gradient domain fusion due to the matching background colors 
+                and also the smoothness of the terrain in the target image. </p><br>
+            
+        </div>
+
+        <h3 align="left">Conclusion</h3>
+        <p>The gradient domain fusion arguably performs just as good as the Laplacian method implemented earlier in the course. However, in order to achieve the 
+            best results, you must pick a source image that matches the target image texture and background color. </p><br>
+      
+     <br>
+     <br>
+     <h2 align="left">Bells & Whistles</h2>
+
+     <h3 align="left">Mixed Blending</h3>
+     <p>I implemented mixed blending which is a variation of poisson blending that basically chooses between using the target image gradient
+        and the source image gradient as the b vector value.</p>
+    <br>
+     <p><b>Implementation Details</b></p>
+     <br><table style="width:100%">
+         <tbody><tr>
+            <td>
+                <figcaption>Mixed Gradient Check</figcaption>
+                <img src="./samples/mixed_code2.png" align="middle" width="400px" vspace="10px" hspace="50px">
+                <figcaption>Max Gradient Helper</figcaption>
+                <img src="./samples/mixed_code3.png" align="middle" width="400px" vspace="10px" hspace="50px" >
+                
+            </td>
+           <td>
+             <figcaption>Optimization Problem</figcaption>
+             <img src="./samples/mixed_code1.png" width="400px" vspace="20px">
+             <p>where d_ij is target_grad or source_grad, chosen based on the largest magnitude</p>
+            </td>
+          
+       </tr>
+       </tbody></table>
+       <br>
+     <p> Here is an example of mixed blending and regular poisson blending:</p>
+        <br><table>
+            <tbody><tr>
+            <td>
+                <img src="./samples/wood.jpg" align="middle" width="300px">
+            </td>
+            <td>
+                <img src="./samples/plus.png" align="middle" width="50px" hspace="50px">
+            </td>
+            <td>
+                <img src="./samples/rose.png" align="middle" width="100px">
+            </td>
+            <td>
+                <img src="./samples/arrow.png" align="middle" width="50px" hspace="50px">
+            </td>
+        
+        </tr>
+        </tbody></table>
+
+        <br><table style="width:100%">
+            <tbody><tr>
+            <td>
+                <figcaption>Mixed Blending</figcaption>
+                <img src="./output/mixed.jpg" align="middle" width="400px">
+            </td>
+            <td>
+                <figcaption>Poisson Blending</figcaption>
+                <img src="./output/unmixed.jpg" align="middle" width="400px">
+            </td>
+        </tr>
+        </tbody></table>
+    <p> <b>Analysis:</b> You can see that the mixed blending does a lot better job of incorporating the target image when the source image has a blank background.
+        In this case, we really only care about the flower drawing, but the poisson tries too hard to blend the gradients of the white background.
+        The mixed technique allows us to ignore blank background and keep the wood look.
+    </p>
+
+    <br><br>
+    <h1 align="left">Final Project 2: Style Transfer</h1>
+    <div>
+
+        <h2 align="left">Implementation Details</h2>
+        <p>This project reimplements the paper "A Neural Algorithm of Artistic Style" by Leon A. Gatys, Alexander S. Ecker and Matthias Bethge. 
+            The main idea is first to define two distances - one for image style and one for image content. Once we have these distances defined,
+            we can minimize both of them, using a random input image, to get the original content transformed into a new style. 
+        </p>
+        <p>As stated by the paper, the main model we will be using is the pretrained VGG-19. Here is a visualization of the architecture:
+        </p>
+        <br><table style="margin: 0px auto;">
+          <tbody><tr>
+            <td>
+                <img src="./data/vgg.png"  width="300px" >
+            </td>
+          </tr>
+        </tbody></table>
+        <p>We will then be adding in some Content and Style Layers that compute our intermediate losses.</p>
+        <p>For content, we define the distance to be the mean squared error between F_XL and F_CL, where F_XL is the featurization of the input image at layer L
+            and F_CL is the featurization of the content image at layer L. 
+        </p>
+        <p>For style, we define the distance to be the mean squared error between G_XL and G_SL, where G_XL is the gram matrix of feature map, F_XL,
+            and G_SL is the gram matrix of feature map, F_CL. Again, all these feature maps refer to the featurization at layer L.
+        </p>
+        <p>Here is a code sample of how we define Content and Style Loss Layers:</p>
+        <br><table style="width:100%">
+            <tbody><tr>
+              <td>
+                  <figcaption>Content Layer</figcaption>
+                  <img src="./data/content_code.png"  width="300px" >
+              </td>
+              <td>
+                  <figcaption>Style Layer</figcaption>
+                  <img src="./data/style_code.png"  width="300px">
+              </td>
+            </tr>
+          </tbody></table>
+          <p>These layers will be placed after the convolution layers. We can select a subset of these layers and play around with them to see 
+            the effect on our results.
+          </p>
+          <p>Once the model is all set up, we can run our input image through it. The key step is that we will freeze the model parameters,
+            but allow the input image to change over time based on the style and content losses. We can initialize our input image
+            to a random set of pixels, and then it will get pushed towards a balance between the style and content image. We can also weight the style and 
+            content images in order to emphasize one or the other. Here is some sample code for adding our additional layers and running the evaluation loop:  </p>
+            <br><table style="width:100%">
+                <tbody><tr>
+                    <td>
+                        <img src="./data/add_layer.png"  width="300px" >
+                    </td>
+                  <td>
+                      <img src="./data/train.png"  width="300px" >
+                  </td>
+                </tr>
+              </tbody></table>
+              <br>
+              <p>Running the evaluation loop for multiple steps, we will get our transformed images! Below I have added some examples. </p>
+        
+
+        <p><b>Good Examples</b></p>
+        <div align="middle">
+            <br><table style="width:100%">
+                <tbody><tr>
+                  <td>
+                      <figcaption>Golden Retriever</figcaption>
+                      <img src="./data/dog.jpeg"  width="250px" >
+                  </td>
+                  <td>
+                      <img src="./samples/plus.png"  width="50px">
+                  </td>
+                  <td>
+                      <figcaption>Van Gogh Style</figcaption>
+                      <img src="./data/starry_night.jpeg"  width="250px">
+                  </td>
+                  <td>
+                      <img src="./samples/arrow.png"  width="50px">
+                  </td>
+                  <td>
+                      <figcaption>Result</figcaption>
+                      <img src="./style_output/dog.jpg" width="250px">
+                  </td>
+                </tr>
+              </tbody></table>
+              <br><table style="width:100%">
+                <tbody><tr>
+                  <td>
+                      <figcaption>Trevi Fountain</figcaption>
+                      <img src="./data/trevi.jpg"  width="250px" >
+                  </td>
+                  <td>
+                      <img src="./samples/plus.png"  width="50px">
+                  </td>
+                  <td>
+                      <figcaption>Keith Style</figcaption>
+                      <img src="./data/keith.jpeg"  width="250px">
+                  </td>
+                  <td>
+                      <img src="./samples/arrow.png"  width="50px">
+                  </td>
+                  <td>
+                      <figcaption>Result</figcaption>
+                      <img src="./style_output/trevi.jpg" width="250px">
+                  </td>
+                </tr>
+              </tbody></table>
+              <br><table style="width:100%">
+                <tbody><tr>
+                  <td>
+                      <figcaption>Joe Biden</figcaption>
+                      <img src="./data/joe.jpeg"  width="250px" >
+                  </td>
+                  <td>
+                      <img src="./samples/plus.png"  width="50px">
+                  </td>
+                  <td>
+                      <figcaption>Obama Poster Style</figcaption>
+                      <img src="./data/obama_art.jpg"  width="250px">
+                  </td>
+                  <td>
+                      <img src="./samples/arrow.png"  width="50px">
+                  </td>
+                  <td>
+                      <figcaption>Result</figcaption>
+                      <img src="./style_output/joe.jpg" width="250px">
+                  </td>
+                </tr>
+              </tbody></table>
+
+              <p align="left"><b>Analysis:</b> These examples do a great job of combining the style and content. In the golden retriever result, you can 
+                clearly see th artifacts of an oil painting. I also particularly like the Trevi fountain combined with Keith Style because you can still 
+                clearly make out the shapes of the statues but the background just gets transformed.</p><br>
+        </div>
+      
+
+        <p><b>Bad Examples</b></p>
+        <div align="middle">
+            <br><table style="width:100%">
+              <tbody><tr>
+                <td>
+                    <figcaption>Panther</figcaption>
+                    <img src="./data/panther.jpeg"  width="250px" >
+                </td>
+                <td>
+                    <img src="./samples/plus.png"  width="50px">
+                </td>
+                <td>
+                    <figcaption>Monet Style</figcaption>
+                    <img src="./data/monet.jpg"  width="250px">
+                </td>
+                <td>
+                    <img src="./samples/arrow.png"  width="50px">
+                </td>
+                <td>
+                    <figcaption>Result</figcaption>
+                    <img src="./style_output/panther.jpg" width="250px">
+                </td>
+              </tr>
+            </tbody></table>
+              <br><table style="width:100%">
+                <tbody><tr>
+                  <td>
+                      <figcaption>Tyler Album Cover</figcaption>
+                      <img src="./data/tyler.jpg"  width="250px" >
+                  </td>
+                  <td>
+                      <img src="./samples/plus.png"  width="50px">
+                  </td>
+                  <td>
+                      <figcaption>Esher Style</figcaption>
+                      <img src="./data/esher.jpeg"  width="250px">
+                  </td>
+                  <td>
+                      <img src="./samples/arrow.png"  width="50px">
+                  </td>
+                  <td>
+                      <figcaption>Result</figcaption>
+                      <img src="./style_output/tyler.jpg" width="250px">
+                  </td>
+                </tr>
+              </tbody></table>
+        </div>
+
+        <p align="left"><b>Analysis:</b> These examples do not seem to perform as well for a few reasons. The first one has 
+        avery subtle texture in the style image, and the input image is also very smooth (not a lot of details). When applying this 
+        subtle style to an image with small gradients, the output does not seem to change very much. For the second image,
+        the style seemed to not take into account the texture of the floating faces, but more focused on the black and white contrast. 
+        Therefore, the output just had more contrasting colors (i.e. darker orange background) instead of broken up the objects like 
+        I would have expected. </p><br>
+
+        <p align="left"><b>Conclusion:</b> The style transfer seems to work vey well, but you have to be selective about what type of images and example 
+        styles you choose. The best results seemed ot come when the content images had a lot of details that could be manipulated 
+        and the style image had a very repetitive texture.  </a> </p><br>
+
+
+
+
+<br>
+<br>
+</div></body></html>

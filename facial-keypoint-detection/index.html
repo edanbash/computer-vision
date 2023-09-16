@@ -1,0 +1,385 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+    <style>
+      body {
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: 'Verdana', sans-serif;
+        color: #121212;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Verdana', sans-serif;
+      }
+    </style>
+    <title>CS 194-26: Project 5</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+    </head>
+    
+    <body>
+
+    <h1 align="left">Project 5: Facial Keypoint Detection with Neural Networks</h1>
+
+    <br><br>
+
+    <div>
+
+        <h2 align="left">Part 1: Nose Tip Detection</h2>
+        <p>GOAL: Predict nose keypoint after training on IMM Face Dataset</p>
+        <br>
+        <p><b>Here are some examples of the ground-truth data:</b></p>
+     <div align="middle">
+         <br><table style="width=100%">
+           <tbody><tr>
+             <td>
+                 <img src="./output/ground-truth-0.jpg" align="middle" width="200px">
+             </td>
+             <td>
+                 <img src="./output/ground-truth-1.jpg" align="middle" width="200px">
+             </td>
+             <td>
+                 <img src="./output/ground-truth-2.jpg" align="middle" width="200px">
+             </td>
+             <td>
+                 <img src="./output/ground-truth-3.jpg" align="middle" width="200px">
+             </td>
+           </tr>
+         </tbody></table>
+         <p align="left"><b>Here is a plot of the training and validation loss during training:</b></p>
+         <br><table style="width=100%">
+             <tbody><tr>
+               <td>
+                   <img src="./output/nose_loss_graph.jpg" align="middle" width="400px">
+               </td>
+             </tr>
+           </tbody></table>
+           <p align="left"><b>Here are some of the model predictions:</b></p>
+           <br><table style="width=100%">
+            <tbody><tr>
+              <td>
+                  <img src="./output/node-pred-0.jpg" align="middle" width="200px">
+              </td>
+              <td>
+                  <img src="./output/node-pred-1.jpg" align="middle" width="200px">
+              </td>
+              <td>
+                  <img src="./output/node-pred-2.jpg" align="middle" width="200px">
+              </td>
+              <td>
+                  <img src="./output/node-pred-3.jpg" align="middle" width="200px">
+              </td>
+            </tr>
+          </tbody></table>
+          <p align="left">The model seems to do very well with faces looking at the camera straight on but has more error for faces 
+            that are tilted to the side.
+          </p>
+       </div>
+     
+     <br>
+     <br>
+     
+     <h2 align="left">Part 2: Full Facial Keypoints Detection</h2>
+    <p>GOAL: Predict 58 key facial points after training on IMM Face Dataset</p>
+    <br>
+    <p><b>Here are some examples of the ground-truth data:</b></p>
+         <br>
+         <div align="middle" >
+            <tbody><tr>
+                <td>
+                    <img src="./output/augmented-data-0.jpg" align="middle" width="200px">
+                </td>
+                <td>
+                    <img src="./output/augmented-data-1.jpg" align="middle" width="200px">
+                </td>
+                <td>
+                    <img src="./output/augmented-data-2.jpg" align="middle" width="200px">
+                </td>
+                <td>
+                    <img src="./output/augmented-data-3.jpg" align="middle" width="200px">
+                </td>
+              </tr>
+            </tbody></table>
+        <p align="left"><b>Detailed CNN Architecture: </b> </p>
+        <div align="left">
+          <p>Hyperparams:</p>
+            <ol>
+              <li>MSE LOSS</li>
+              <li>Adam Optimizer</li>
+              <li>Epochs = 20</li>
+              <li>Learning Rate = 0.001</li>
+              <li>Weight Decay: betas=(0.9, 0.999)</li>
+            </ol>
+          <p>Model Structure:</p>
+        </div>
+
+          <br><table style="width=100%" >
+            <tbody><tr>
+              <td>
+                  <img src="./output/model_part2.png" align="middle" width="400px">
+              </td>
+            </tr>
+          </tbody></table>
+        <br>
+        <p align="left"><b>Here is a plot of the training and validation loss during training:</b></p>
+         <br><table style="width=100%">
+             <tbody><tr>
+               <td>
+                   <img src="./output/keypoint_loss_graph.jpg" align="middle" width="400px">
+               </td>
+             </tr>
+           </tbody></table>
+           <p align="left"><b>Here are some of the model predictions:</b></p>
+           <br><table style="width=100%">
+            <tbody><tr>
+              <td>
+                  <img src="./output/keypoint-pred-right-0.jpg" align="middle" width="200px">
+              </td>
+              <td>
+                  <img src="./output/keypoint-pred-right-1.jpg" align="middle" width="200px">
+              </td>
+              <td>
+                  <img src="./output/keypoint-pred-wrong-0.jpg" align="middle" width="200px">
+              </td>
+              <td>
+                  <img src="./output/keypoint-pred-wrong-1.jpg" align="middle" width="200px">
+              </td>
+            </tr>
+          </tbody></table>
+          <p align="left">Analysis: The model seems to do very well with faces looking at the camera straight on but there are slightly more errors when
+            the face is scaled down in size or is looking off to the side.
+          </p>
+         </div>
+         <br>
+         <br>
+         <p><b>Here are the learned filters:</b></p>
+         <br>
+         <br><table style="width=100%" align="center">
+            <tbody><tr>
+              <td>
+                  <figcaption>Layer 1</figcaption>
+                  <img src="./output/layer1.jpg" align="middle" width="250px">
+              </td>
+              <td>
+                <figcaption>Layer 2</figcaption>
+                  <img src="./output/layer2.jpg" align="middle" width="250px">
+              </td>
+              <td>
+                <figcaption>Layer 3</figcaption>
+                  <img src="./output/layer3.jpg" align="middle" width="250px">
+              </td>
+            </tr>
+          </tbody></table>
+          <br><table style="width=100%" align="center">
+            <tbody><tr>
+              <td>
+                <figcaption>Layer 4</figcaption>
+                  <img src="./output/layer4.jpg" align="middle" width="250px">
+              </td>
+              <td>
+                <figcaption>Layer 5</figcaption>
+                  <img src="./output/layer5.jpg" align="middle" width="250px">
+              </td>
+            </tr>
+          </tbody></table>
+     <br>
+     <br>
+     <h2 align="left">Part 3: Train With Larger Dataset</h2>
+     <p>GOAL: Predict 68 key facial points after training on larger face dataset</p>
+    <br>
+     <p><b>Here are some examples of the ground-truth data:</b></p>
+     <div align="middle">
+         <br><table style="width=100%">
+           <tbody><tr>
+             <td>
+                 <img src="./output/large-data-cropped-0.jpg" align="middle" width="200px">
+             </td>
+             <td>
+                 <img src="./output/large-data-cropped-1.jpg" align="middle" width="200px">
+             </td>
+             <td>
+                 <img src="./output/large-data-cropped-2.jpg" align="middle" width="200px">
+             </td>
+             <td>
+                 <img src="./output/large-data-cropped-3.jpg" align="middle" width="200px">
+             </td>
+           </tr>
+         </tbody></table>
+      <p align="left"><b>Detailed Model Architecture:</b></p>
+        <div align="left">
+          <p>Hyperparams:</p>
+            <ol>
+              <li>MSE LOSS</li>
+              <li>Adam Optimizer</li>
+              <li>Epochs = 10</li>
+              <li>Learning Rate = 0.001</li>
+              <li>Weight Decay: betas=(0.9, 0.999)</li>
+            </ol>
+          <p>Model Structure:</p>
+        </div>
+        <br><table style="width=100%">
+          <tbody><tr>
+            <td>
+              <img src="./output/resnet1.png" align="middle" height="300px">
+            </td>
+            <td>
+                <img src="./output/resnet2.png" align="middle" height="300px">
+            </td>
+          </tr>
+        </tbody></table>
+      </p>
+      <br>
+      <p align="left"><b>Here is a plot of the training and validation loss during training:</b></p>
+      <br><table style="width=100%">
+          <tbody><tr>
+            <td>
+                <img src="./output/large_data_loss_graph.jpg" align="middle" width="400px">
+            </td>
+          </tr>
+        </tbody></table>
+        <p align="left"><b>Here are some predicted keypoints on test set:</b></p>
+        <br><table style="width=100%">
+            <tbody><tr>
+              <td>
+                <img src="./output/large-dataset-keypoint-pred-0.jpg" align="middle" height="200px">
+              </td>
+              <td>
+                  <img src="./output/large-dataset-keypoint-pred-1.jpg" align="middle"  height="200px">
+              </td>
+              <td>
+                  <img src="./output/large-dataset-keypoint-pred-2.jpg" align="middle"  height="200px">
+              </td>
+            </tr>
+          </tbody></table>
+        <p align="left"><b>Here are some predicted keypoints for my collection:</b></p>
+        <br><table style="width=100%">
+            <tbody><tr>
+              <td>
+                <img src="./output/custom1-pred.jpg" align="middle" height="200px">
+              </td>
+              <td>
+                  <img src="./output/custom2-pred.jpg" align="middle" height="200px">
+              </td>
+              <td>
+                  <img src="./output/custom3-pred.jpg" align="middle" height="200px">
+              </td>
+            </tr>
+          </tbody></table>
+          <p align="left"><b>Analysis:</b> I noticed my model struggled a little bit with the custom photos which means it probably did some overfitting.
+            In terms of features, it was good at getting the eye shape but the jawline points were a little wide.
+          </p>
+        </div>
+
+     <br>
+ 
+     <h2 align="left">Part 4: Pixelwise Classification</h2>
+     <p>GOAL: Predict 68 key facial points after training on larger face dataset. Use heatmaps as labels instead of landmark points.</p>
+     <div align="middle" >
+      <br>
+     <p align='left'><b>Report the distribution and corresponding parameters used to generate heatmaps.</b></p>
+      <p align='left'>I used the same dataset from Part 3 but generated a heatmap per landmark instead of just having one point. 
+        I generated the heatmap by centering a 2D gaussian kernel (with size 10 and sigma 5) around the landmark point. 
+        I then summed up all the heatmaps of the individual landmarks to create the total image. 
+      </p>
+     <br>
+    
+     <p align="left"><b>Here are some heatmap visualizations:</b></p>
+     <br><table style="width=100%">
+      <tbody><tr>
+        <td>
+          <img src="./output/heatmap-0.jpg" align="middle" width="300px">
+        </td>
+        <td>
+            <img src="./output/heatmap-1.jpg" align="middle" width="300px">
+        </td>
+        <td>
+          <img src="./output/heatmap-2.jpg" align="middle" width="300px">
+      </td>
+      </tr>
+    </tbody></table>
+     <br>
+
+     <p align="left"><b>Detailed Model Architecture: </b>
+      <div align="left">
+        <p>Hyperparams:</p>
+          <ol>
+            <li>Cross Entropy Loss</li>
+            <li>Adam Optimizer</li>
+            <li>Epochs = 10</li>
+            <li>Learning Rate = 0.05</li>
+            <li>Weight Decay: betas=(0.9, 0.999)</li>
+          </ol>
+        <p>Model Structure:</p>
+      </div>
+      <br><table style="width=100%">
+        <tbody><tr>
+          <td>
+              <img src="./output/unet1.png" align="middle" height="300px">
+          </td>
+          <td>
+              <img src="./output/unet2.png" align="middle" height="300px">
+          </td>
+          <td>
+             <img src="./output/unet3.png" align="middle" height="300px">
+        </td>
+        </tr>
+      </tbody></table>
+      </p>
+
+    <p align="left">Here is a plot of the training and validation loss during training:</p>
+      <br><table style="width=100%">
+          <tbody><tr>
+            <td>
+                <img src="./output/unet_loss_graph.png" align="middle" width="400px">
+            </td>
+          </tr>
+        </tbody></table>
+
+    <p align="left"><b>Visualize some images with the keypoints prediction in the testing set:</b></p>
+    <p align="left"><b>Heatmap Interpretation Method:</b> The output of the Unet was in the form of 68 differnt heatmaps. In order to get a landmark point,
+      I first took the softmax over the each map, creating a probability matrix essentially. I then used these proabbilities as weights and found the
+      weighted average for both the x and y coordinates to determine a landmark point. </p>
+    <br><table style="width=100%">
+      <tbody><tr>
+        <td>
+          <img src="./output/unet_pred-0.jpg" align="middle" width="200px">
+        </td>
+        <td>
+            <img src="./output/unet_pred-1.jpg" align="middle" height="200px">
+        </td>
+        <td>
+          <img src="./output/unet_pred-2.jpg" align="middle" width="300px">
+      </td>
+      </tr>
+    </tbody></table>
+
+    <p align="left"><b>Here are some predicted keypoints from my collection:</b></p>
+      <br><table style="width=100%">
+          <tbody><tr>
+            <td>
+              <img src="./output/unet-pred-custom-0.jpg" align="middle" width="200px">
+            </td>
+            <td>
+                <img src="./output/unet-pred-custom-1.jpg" align="middle" width="200px">
+            </td>
+            <td>
+                <img src="./output/unet-pred-custom-2.jpg" align="middle" width="200px">
+            </td>
+          </tr>
+        </tbody></table>
+        <p align="left"><b>Analysis:</b> I noticed my model did better on the non-smiling image (maybe because there were less wrinkles to throw off the prediction).
+           In terms of features, it did a good job of getting mouth and nose points, but struggled more with the eye points. 
+        </p>
+     </div>
+
+ 
+     <h2 align="left">Part 5: Kaggle</h2>
+     <ul>
+      <li>Kaggle username: Edan Bash</li>
+      <li>Mean absolute error: 16.68</li>
+      <li>ResNet18 (see part 3 for description)</li>
+     </ul>
+
+    
+</div></body></html>

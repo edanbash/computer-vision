@@ -1,0 +1,275 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head>
+    <style>
+      body {
+        padding: 100px;
+        width: 1000px;
+        margin: auto;
+        text-align: left;
+        font-weight: 300;
+        font-family: 'Verdana', sans-serif;
+        color: #121212;
+      }
+      h1, h2, h3, h4 {
+        font-family: 'Verdana', sans-serif;
+      }
+    </style>
+    <title>CS 194-26: Project 1 Colorizing Images</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+    </head>
+    
+    
+    <body>
+    
+    <h1 align="left">Project 1:  Colorizing Images</h1>
+
+    <br><br>
+
+    <div>
+    
+    <h2 align="left">Overview</h2>
+    <p> In this project, I took digitized Prokudin-Gorskii glass plate images and used image processing techniques to colorize them.
+        My general approach was to use the Sum of Squared Differences (SSD) as a similarity metric in order to compare the pixel values of the different channels. 
+        After finding the ideal offset of the R and G channels relative to the B channel, then I was able to overlap the channels to create the final colorized image. 
+    </p>
+    <h2 align="left">Naive Exhaustive Search</h2>
+    <p><b>Algorithm:</b></p>
+        <ol>
+            <li>Preprocess the image
+                <ul>
+                    <li>Extract the independent b, g, and r channels. Each channel has height = total_h / 3</li>
+                    <li>Map each pixel value from [0,255] scale to the [0,1] scale. (seems to be better for L2 Norm metric) </li>
+                </ul> 
+            <li>Crop the images to remove noisy borders. 
+                <ul>
+                    <li>I just removed a constant 10% of the image from each edge.</li>
+                </ul> 
+            <li>Initialize some important values</li>
+            <ul>
+                <li>Best offset = (0, 0)</li>
+                <li>Similarity_score = +inf since the optimal value will be a minimum </li>
+                <li>Offset range = [-15, 15]. This is random but should be realtively small.</li>
+            </ul>
+            <li>Loop through all possible combos of (x,y) image offset values.</li>
+            <ul>
+                <li>Shift the second image based on the offset</li>
+                <li>Take the similarity score (L2 Norm) between the base channel and shifted channel</li>
+                <li>If similarity score is lower than current best score, then update the best offset values</li>
+            </ul>
+            <li>Stack the R G B channels (with shifts applied) to produce final image.</li>
+        </ol>
+    <br>
+    <br>
+        The resulting images are below:
+    <br>
+    <div align="middle">
+        <br><table style="width=100%">
+          <tbody><tr>
+            <td>
+                <figcaption align="middle">monastery.jpg</figcaption>
+                <img src="./colorized_imgs/monastery.jpg" align="middle" width="300px">
+                <figcaption align="middle">Offsets: R: (2, 3)  G: (2, -3)</figcaption>
+            </td>
+            <td>
+                <figcaption align="middle">tobolsk.jpg</figcaption>
+                <img src="./colorized_imgs/tobolsk.jpg" align="middle" width="300px">
+                <figcaption align="middle">Offsets: R: (3, 6)  G: (3, 3)</figcaption>
+    
+            </td>
+            <td>
+              <figcaption align="middle">cathedral.jpg</figcaption>
+              <img src="./colorized_imgs/cathedral.jpg" align="middle" width="300px">
+              <figcaption align="middle">Offsets: R: (3, 12) G: (2, 5)</figcaption>
+            </td>
+          </tr>
+        </tbody></table>
+      </div>
+    
+    
+    <h2 align="left">Image Pyramid</h2>
+        <p><b>Description:</b></p>
+        <p>I implemented the image pyramid technique in order to optimize the offset search for larger images. The idea behingd the image pyramid is to downsize the original image 
+            by factors of 2, which can be visualized as a pyramid with the smallest image on the top and the original image on the bottom. Start from the top of the pyramid and find 
+            the best offset relative to these smaller versions of the image. Then, move your way down, updating the best offset as you go.
+        </p>
+       
+        <p><b>Algorithm:</b></p>
+        <ol>
+            <li>Preprocess image using same technique in Step 1 Naive Exhaustive Search.</li>
+            <li>Generate the image pyramid for each color channel.</li>
+            <ul>
+                <li>Add original image to a pyramid list</li>
+                <li>Half the size of the most recently added image</li>
+                <li>Add new smaller image to pyramid list</li>
+                <li>Repeat previous 2 steps X number of times to create levels in the pyramid.</li>
+                <li><b>Note:</b> I just created 6 levels as it was fast and produced good results</li>
+            </ul>
+            <li>Initialize some important values</li>
+            <ul>
+                <li>Best offset = (0, 0), represents total offset</li>
+                <li>New offset = (0, 0), represent offset of current pyramid level</li>
+            </ul>
+            <li>Loop through all levels of pyramid, starting from smallest images.</li>
+            <ul>
+                <li>Mutiply the best offset by 2, since the next image of the pyramid will be scaled by 2</li>
+                <li>Shift the image by the current best offset. This keeps the progress from our previous levels.</li>
+                <li>Call exhaustive search using the shifted image and base image to get a new offset in the [-15,15] range</li>
+                <li>Add this new offset to the best offset</li>
+            </ul>
+             <li>Stack the R G B channels (with shifts applied) to produce final image.</li>
+        </ol>
+        <br>
+        <br>
+            <h3>Given Examples</h3>
+        <br>
+        <div align="middle">
+            <br><table style="width=100%">
+                <tbody><tr>
+                    <td>
+                        <figcaption align="middle">church.jpg</figcaption>
+                        <img src="./colorized_imgs/church.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (58, -4)  G: (25, 4)</figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">harvesters.jpg</figcaption>
+                        <img src="./colorized_imgs/harvesters.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (124, 14)  G: (60, 17)</figcaption>
+            
+                    </td>
+                    <td>
+                    <figcaption align="middle">icon.jpg</figcaption>
+                    <img src="./colorized_imgs/icon.jpg" align="middle" width="300px">
+                    <figcaption align="middle">Offsets: R: (90, 23) G: (41, 17)</figcaption>
+                    </td>
+                </tr>
+            </tbody></table>
+            <br><table style="width=100%">
+                <tbody><tr>
+                    <td>
+                        <figcaption align="middle">lady.jpg</figcaption>
+                        <img src="./colorized_imgs/lady.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (112, 12)  G: (52, 9)</figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">melons.jpg</figcaption>
+                        <img src="./colorized_imgs/melons.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (178, 13)  G: (82, 10)</figcaption>
+            
+                    </td>
+                    <td>
+                        <figcaption align="middle">onion_church.jpg</figcaption>
+                        <img src="./colorized_imgs/onion_church.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (108, 36) G: (52, 26)</figcaption>
+                    </td>
+                </tr>
+            </tbody></table>
+            <br><table style="width=100%">
+                <tbody><tr>
+                    <td>
+                        <figcaption align="middle">sculpture.jpg</figcaption>
+                        <img src="./colorized_imgs/sculpture.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (140, -27)  G: (33, -11)</figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">self_portrait.jpg</figcaption>
+                        <img src="./colorized_imgs/self_portrait.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (126, 37)  G: (79, 29)</figcaption>
+            
+                    </td>
+                    <td>
+                        <figcaption align="middle">three_generations.jpg</figcaption>
+                        <img src="./colorized_imgs/three_generations.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (112, 11) G: (53, 14)</figcaption>
+                    </td>
+                </tr>
+            </tbody></table>
+            <br><table style="width=100%">
+                <tbody><tr>
+                    <td>
+                        <figcaption align="middle">train.jpg</figcaption>
+                        <img src="./colorized_imgs/train.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (87, 32)  G: (42, 6)</figcaption>
+                    </td>
+                    <td>
+                        <figcaption align="middle">emir.jpg</figcaption>
+                        <img src="./colorized_imgs/emir.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (-776, 96)  G: (49, 29) </figcaption>
+                    </td>
+                </tr>
+            </tbody></table>
+            <p align="left">Note: The emir image does not align well since the color channel raw values do not match up, therefore giving a misleading similarity score.</p>
+            
+            <h3 align="left">Self-Chosen Examples</h3>
+            <div align="middle">
+                <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption align="middle">extra1.jpg</figcaption>
+                            <img src="./colorized_imgs/extra1.jpg" align="middle" width="300px">
+                            <figcaption align="middle">Offsets: R: (64, 16)  G: (26, 11)</figcaption>
+                        </td>
+                        <td>
+                            <figcaption align="middle">extra2.jpg</figcaption>
+                            <img src="./colorized_imgs/extra2.jpg" align="middle" width="300px">
+                            <figcaption align="middle">Offsets: R: (174, 40)  G: (77, 25)</figcaption>
+                
+                        </td>
+                        <td>
+                        <figcaption align="middle">extra3.jpg</figcaption>
+                        <img src="./colorized_imgs/extra3.jpg" align="middle" width="300px">
+                        <figcaption align="middle">Offsets: R: (64, 10) G: (28, 10)</figcaption>
+                        </td>
+                    </tr>
+                </tbody></table>
+          </div>
+    <br>
+    <br>
+
+    <div align="left">
+        <h2>Bells &amp; Whistles</h2>
+        <h3>Auto Contrast</h3>
+        <p align="left"><b>Description:</b></p>
+            <p>I implemented the auto contrast functionality, which essentially calculates the CDF of each pixel value in the image. Once we have the pixel values mapped from [0, 1] 
+                and they encompass the full range of values availble, I can just multiply these values by 255 to get a more broad range of colors. 
+            </p>
+        <br>
+            Some original images and their contrasted counterparts are shown below:
+        <br>
+            <div align="middle">
+                <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption align="middle">cathedral.jpg</figcaption>
+                            <img src="./colorized_imgs/cathedral.jpg" align="middle" width="300px">
+                        </td>
+                        <td>
+                            <figcaption align="middle">monastery.jpg</figcaption>
+                            <img src="./colorized_imgs/monastery.jpg" align="middle" width="300px">
+                        </td>
+                        <td>
+                            <figcaption align="middle">tobolsk.jpg</figcaption>
+                            <img src="./colorized_imgs/tobolsk.jpg" align="middle" width="300px">
+                        </td>
+                    </tr>
+                </tbody></table>
+                <br><table style="width=100%">
+                    <tbody><tr>
+                        <td>
+                            <figcaption align="middle">cathedral_contrast.jpg</figcaption>
+                            <img src="./colorized_imgs/cathedral_contrast.jpg" align="middle" width="300px">
+                        </td>
+                        <td>
+                            <figcaption align="middle">monastery_contrast.jpg</figcaption>
+                            <img src="./colorized_imgs/monastery_contrast.jpg" align="middle" width="300px">
+                        </td>
+                        <td>
+                            <figcaption align="middle">tobolsk_contrast.jpg</figcaption>
+                            <img src="./colorized_imgs/tobolsk_contrast.jpg" align="middle" width="300px">
+                        </td>
+                    </tr>
+                </tbody></table>
+        </div>
+    
+    
+    
+    </div></body></html>
